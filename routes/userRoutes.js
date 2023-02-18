@@ -1,10 +1,6 @@
 const express = require('express');
+const { emailValidation, signUp } = require('../controllers/user/signup');
 
 const router = express.Router();
-router.get('/', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'Ami from the test Route !',
-  });
-});
+router.route('/signup').post(emailValidation, signUp);
 module.exports = router;
