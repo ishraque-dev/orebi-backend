@@ -33,3 +33,16 @@ exports.signUp = catchAsync(async (req, res, next) => {
     message: token,
   });
 });
+exports.getUsers = async function (req, res, next) {
+  try {
+    const users = await User.find();
+    res.json({
+      status: 'success',
+      data: {
+        users,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
