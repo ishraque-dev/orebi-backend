@@ -7,17 +7,11 @@ const AppError = require('../../utils/appError');
 exports.emailValidation = async function (req, res, next) {
   const regex = /[a-z0-9]+@[a-z]+.[a-z]{2,3}/.test(req.body.email);
   if (!regex) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid email address',
-    });
+    return next(new AppError('Invalid email address', 400));
   }
   const existingEmail = await User.findOne({ email: req.body.email });
   if (existingEmail && existingEmail.email === req.body.email) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid email address',
-    });
+    return next(new AppError('email address already exist', 400));
   }
   next();
 };

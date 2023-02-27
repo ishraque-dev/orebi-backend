@@ -14,7 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use('/api/v1/users', userRouter);
-
 // Middleware: handle undefined routes
 
 app.all('*', (req, res, next) => {
