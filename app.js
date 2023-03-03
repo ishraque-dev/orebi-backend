@@ -13,6 +13,12 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use('/', (req, res, next) => {
+  res.status(200).json({
+    message:
+      "Hey there, I'm not ready to show something interesting to you. I'm on development process. ",
+  });
+});
 app.use('/api/v1/users', userRouter);
 // Middleware: handle undefined routes
 
