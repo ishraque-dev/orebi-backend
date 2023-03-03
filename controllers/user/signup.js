@@ -1,7 +1,10 @@
+const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 const User = require('../../models/userModel');
 const generateWebToken = require('../../utils/generateWebToken');
 const sendEmail = require('../../utils/sendEmail');
 const catchAsync = require('../../utils/catchAsync');
+const { emailVerificationHtml } = require('../../utils/emailTemp');
 const AppError = require('../../utils/appError');
 
 exports.emailValidation = async function (req, res, next) {
@@ -22,21 +25,61 @@ exports.signUp = catchAsync(async (req, res, next) => {
   const user = await User.create(data);
 
   const token = generateWebToken(user.email);
-  await sendEmail(user.email, user.name);
+  const url = `${req.protocol}://${req.get('host')}/api/v1/users/verification`;
+
+  const html = emailVerificationHtml({ user: user.name, link: url });
+  await sendEmail(user.email, user.name, html);
   res.status(201).json({
     message: token,
   });
 });
-exports.getUsers = async function (req, res, next) {
-  try {
-    const users = await User.find();
-    res.json({
-      status: 'success',
-      data: {
-        users,
-      },
-    });
-  } catch (error) {
-    console.log(error);
+// Login
+exports.login = async function (req, res, next) {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password'));
   }
+  const user = await User.findOne({ email: email });
+  if (!user.verified) {
+    return next(new AppError('Please verify your email to continue', 401));
+  }
+  const correct = user && (await user.correctPassword(password, user.password));
+
+  if (!user || !correct) {
+    return next(new AppError('Incorrect email or password', 401));
+  }
+  res.status(200).json({
+    user,
+  });
+};
+exports.emailVerification = async function (req, res, next) {
+  let token;
+  if (req.headers && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (!token) {
+    return next(new AppError('Unauthorized. Please login and try again', 401));
+  }
+  // Verify the token
+  const decodedToken = await promisify(jwt.verify)(token, 'UR6YKRyMrz');
+
+  const alreadyVerified = await User.findOne({
+    email: decodedToken.data,
+  });
+  if (alreadyVerified.verified) {
+    return next(new AppError('Your account has already been verified', 400));
+  }
+  const currentUser = await User.findOneAndUpdate(
+    decodedToken.data,
+    {
+      verified: true,
+    },
+    {
+      new: true,
+    }
+  );
+  res.json({
+    status: 'success',
+    currentUser,
+  });
 };

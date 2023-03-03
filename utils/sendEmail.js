@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const sendEmail = async function (receiver, userName) {
+const sendEmail = async function (receiver, userName, html) {
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -21,7 +21,7 @@ const sendEmail = async function (receiver, userName) {
       to: receiver, //'ishrak575@gmail.com', // list of receivers
       subject: 'Registration successful', // Subject line
       //   text: , // plain text body
-      html: `Congratulation ${userName} your account is successfully created`, // html body
+      html: html,
     });
   } catch (error) {
     throw new Error(error);
