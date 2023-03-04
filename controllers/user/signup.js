@@ -83,3 +83,37 @@ exports.emailVerification = async function (req, res, next) {
     currentUser,
   });
 };
+// Forgot Password
+
+exports.forgotPassword = async function (req, res, next) {
+  // Get the user based on the posted email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError(`There is no user with email ${req.body.email}`));
+  }
+  // Generate the random token
+  const resetToken = user.createPasswordResetToken();
+  await user.save({
+    validateBeforeSave: false,
+  });
+  // Send it to the users email address
+  const resetUrl = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/resetPassword/${resetToken}`;
+  const html = `Forgot your password? Click the link below to reset your password \n ${resetUrl} `;
+  try {
+    await sendEmail(user.email, undefined, html);
+    res.status(200).json({
+      status: 'success',
+      message: 'Token has successfully sended',
+    });
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpiresIn = undefined;
+    return next(
+      new AppError(
+        'There was an error sending the token. Please try again later'
+      )
+    );
+  }
+};

@@ -19,7 +19,7 @@ const sendEmail = async function (receiver, userName, html) {
         address: "'ahamedesrak3@gmail.com'",
       }, // sender address
       to: receiver, //'ishrak575@gmail.com', // list of receivers
-      subject: 'Registration successful', // Subject line
+      subject: `Registration successful`, // Subject line
       //   text: , // plain text body
       html: html,
     });
