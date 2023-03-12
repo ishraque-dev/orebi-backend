@@ -2,6 +2,7 @@ const { promisify } = require('util');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/userModel');
+const Merchant = require('../../models/merchantModel');
 const generateWebToken = require('../../utils/generateWebToken');
 const sendEmail = require('../../utils/sendEmail');
 const catchAsync = require('../../utils/catchAsync');
@@ -144,3 +145,20 @@ exports.resetPassword = async function (req, res, next) {
   });
   // create and send new token
 };
+// =========================
+exports.createMerchant = catchAsync(async (req, res, next) => {
+  const { brand, user } = req.body;
+  const data = await Merchant.create({ brand, user });
+  res.status(200).json({
+    data,
+  });
+});
+exports.getMerchants = catchAsync(async (req, res) => {
+  const data = await Merchant.find().populate({
+    path: 'user',
+    select: 'name email',
+  });
+  res.status(200).json({
+    data,
+  });
+});
