@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 const userRouter = require('./routes/userRoutes');
+const adminRouter = require('./routes/adminRoute');
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 
@@ -20,6 +21,7 @@ app.get('/', (req, res, next) => {
   });
 });
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/admin', adminRouter);
 // Middleware: handle undefined routes
 
 app.all('*', (req, res, next) => {

@@ -6,9 +6,11 @@ const {
   login,
   forgotPassword,
   resetPassword,
+} = require('../controllers/user/signup');
+const {
   getMerchants,
   createMerchant,
-} = require('../controllers/user/signup');
+} = require('../controllers/user/merchant');
 
 const router = express.Router();
 router.route('/signup').post(emailValidation, signUp);
